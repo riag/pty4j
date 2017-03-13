@@ -1,0 +1,63 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+
+def name = 'pty4j'
+
+def antKey = 'version'
+ant.loadfile(srcFile: 'version', property: antKey)
+
+version = ant.properties[antKey]
+
+project.buildDir = "classess"
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile fileTree(dir: 'lib', include: '*.jar')
+	testCompile fileTree(dir: 'lib', include: '*.jar')
+}
+
+sourceSets {
+	main {
+        java {
+            srcDirs = ['src/']
+        }
+    }
+	test{
+		java {
+			srcDirs = ['test/']
+		}
+	}
+}
+
+sourceSets.all {
+    println name
+}
+
+jar{
+	baseName = name
+	version = version
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+	sourceCompatibility = 1.6
+	targetCompatibility = 1.6
+}
+
+task packSourcesJar(type: Jar, dependsOn: jar) {
+    classifier = 'src'
+    from sourceSets.main.allSource
+}
+
+task pack(type:Copy, dependsOn: [packSourcesJar]){
+
+	def dist_dir = "$project.projectDir/build/"
+	from jar
+	into dist_dir
+    from packSourcesJar
+	into dist_dir
+}
